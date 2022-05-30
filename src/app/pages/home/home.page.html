@@ -12,15 +12,23 @@
 
     <img #imagePreview alt="" src="/assets/images/placeholder.jpg" class="selected-image">
 
-    
+    <div id="filename" *ngIf="file">{{ file.name }}</div>
 
-    <input type="file" #file (change)="setFile()" accept="image/*">
+
+
+    <input type="file" #inputFileElement (change)="setFile()" accept="image/*">
 
     <ion-button (click)="triggerInputFile()">Select Image</ion-button>
     <!-- <ion-button (click)="triggerModel">model</ion-button> -->
-    <ion-button color="success" (click)="classify()" *ngIf="hasValidImage">Classify</ion-button>
+<!--    <ion-button color="success" (click)="classify()" *ngIf="hasValidImage">Classify</ion-button>-->
 
-    <p *ngIf="result">Predicted Variety: {{ result }}</p>
+
+    <p id="result">
+      <span *ngIf="result">Predicted Variety: {{ result }}</span>
+      <span *ngIf="result == null && file">Predicting...</span>
+    </p>
+
+    <canvas #canvas></canvas>
 
 
 </ion-content>

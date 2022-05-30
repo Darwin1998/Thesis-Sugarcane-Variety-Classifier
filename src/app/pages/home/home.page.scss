@@ -13,3 +13,17 @@ ion-button {
 input[type="file"] {
     display: none;
 }
+
+canvas {
+  display: none;
+}
+
+#filename,
+#result {
+  margin: 0 auto;
+  text-align: center;
+}
+
+#result {
+  margin-top: 20px;
+}

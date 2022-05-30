@@ -1,8 +1,7 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
-import { ToastController } from '@ionic/angular';
-import { hexToLong } from '@tensorflow/tfjs-core/dist/hash_util';
+import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
+import {ToastController} from '@ionic/angular';
 import * as tf from '@tensorflow/tfjs';
-import { TARGET_CLASSES } from './target_classes';
+import {TARGET_CLASSES} from './target_classes';
 
 @Component({
   selector: 'app-home',
@@ -13,63 +12,99 @@ export class HomePage implements OnInit {
 
   hasValidImage = false;
 
+
+
   model = null;
 
-  @ViewChild('file', { static: true }) file: ElementRef;
-  @ViewChild('imagePreview', { static: true }) imagePreview: ElementRef;
+  @ViewChild("canvas") canvas: ElementRef = null;
+
+  file: any = null;
+
+  @ViewChild('inputFileElement', {static: true}) inputFileElement: ElementRef;
+  @ViewChild('imagePreview', {static: true}) imagePreview: ElementRef;
 
   result: string = null;
 
-  constructor(private toastService: ToastController) { }
+  constructor(private toastService: ToastController) {
+  }
 
   ngOnInit() {
   }
 
- ionViewDidEnter() {
-    console.log(this.file);
+  ionViewDidEnter() {
+    console.log(this.inputFileElement);
 
-    
-   tf.loadLayersModel('/assets/model/otherModel/model.json').then(model => {
+
+    tf.loadLayersModel('/assets/model/otherModel/model.json').then(model => {
       this.model = model;
-      
+
       this.toast("Model was loaded successfully");
     })
-    .catch(e => {
-      console.log(e);
-      this.toast("Error loading model");
-    });
+      .catch(e => {
+        console.log(e);
+        this.toast("Error loading model");
+      });
 
   }
 
   setFile() {
-    const input: HTMLInputElement = this.file.nativeElement;
+    const input: HTMLInputElement = this.inputFileElement.nativeElement;
     this.hasValidImage = false;
 
     this.result = null;
+    this.file = null;
 
 
     if (input.files.length > 0) {
 
       const file = input.files[0];
 
+      this.file = file;
+
       const reader = new FileReader();
       reader.onload = () => {
-        var output = document.getElementById('output');
         this.imagePreview.nativeElement.src = reader.result as string;
         this.hasValidImage = true;
+
+
+        const newImg = new Image();
+
+        newImg.onload = () => {
+          const height = newImg.height;
+          const width = newImg.width;
+
+
+          const scale = 1;
+
+          this.canvas.nativeElement.width = this.imagePreview.nativeElement.naturalWidth * scale;
+          this.canvas.nativeElement.height = this.imagePreview.nativeElement.naturalHeight * scale;
+
+          const context = this.canvas.nativeElement.getContext('2d');
+          context.drawImage(this.imagePreview.nativeElement, 0, 0, this.canvas.nativeElement.width, this.canvas.nativeElement.height);
+
+
+          // console.log(this.canvas.nativeElement)
+
+          this.classify();
+
+        }
+
+        newImg.src = this.imagePreview.nativeElement.src
+
+
+
+
       };
       reader.readAsDataURL(file);
 
 
-    }
-
-    else {
+    } else {
       this.imagePreview.nativeElement.src = "/assets/images/placeholder.jpg";
     }
   }
 
   triggerInputFile() {
-    this.file.nativeElement.click();
+    this.inputFileElement.nativeElement.click();
   }
 
   triggerModel() {
@@ -83,18 +118,17 @@ export class HomePage implements OnInit {
       return;
     }
 
-    const input: HTMLInputElement = this.file.nativeElement;
-    this.toast("Loading model...");
 
 
-    if (input.files.length > 0) {
+    if (this.file) {
 
-      let tensor = tf.browser.fromPixels(this.rescaleImg(this.imagePreview.nativeElement), 3)
+      let tensor = tf.browser.fromPixels(this.canvas.nativeElement, 3)
         .resizeNearestNeighbor([200, 200]) // change the image size
         .expandDims()
-        .toFloat().reverse(-1);
+        // .toFloat()
+        .reverse(-1);
 
-      let predictions = this.model.classify(tensor) as any;
+      let predictions = this.model.predict(tensor) as any;
 
       const d = await predictions.data() as [];
       console.log(d);
@@ -108,16 +142,13 @@ export class HomePage implements OnInit {
         })
         .sort(function (a: any, b: any) {
           return b.probability - a.probability;
-        }).slice(0,5) as any[];
+        }).slice(0, 5) as any[];
 
       console.log(top5);
       this.result = top5[0].className;
-      
-      
 
-    }
 
-    else {
+    } else {
       // No file selected
       this.toast("Please select an image first.");
     }
@@ -129,20 +160,27 @@ export class HomePage implements OnInit {
 
     this.toastService.create({
       message: message,
+      duration: 3000
     }).then(toast => {
       toast.present();
-    })
+    });
   }
 
-   rescaleImg(img) {
-    var cv = require('opencv.js');
-    const src = cv.imread(img);
-    let dst = new cv.Mat();
-    
-    // rescale by 1/255, and hold values in a matrix with float32 data type
-    src.convertTo(dst, cv.CV_32F, 1./255.); 
-    return src;
-    
-    
-  }
+  // rescaleImg(img) {
+  //   var cv = require('opencv.js');
+  //   const src = cv.imread(img);
+  //   let dst = new cv.Mat();
+  //
+  //   // rescale by 1/255, and hold values in a matrix with float32 data type
+  //   src.convertTo(dst, cv.CV_32F, 1. / 255.);
+  //   return src;
+  //
+  //
+  // }
+
+  // getImageData(img) {
+  //   ctx.drawImage(img, 0, 0);
+  //   imageData = ctx.getImageData(0, 0, img.width, img.height).data;
+  //   console.log("image data:", imageData);
+  // }
 }
