@@ -21,6 +21,7 @@
     "@angular/router": "~13.2.2",
     "@ionic/angular": "^6.0.0",
     "@tensorflow/tfjs": "^3.17.0",
+    "opencv.js": "^1.2.1",
     "rxjs": "~6.6.0",
     "tslib": "^2.2.0",
     "zone.js": "~0.11.4"

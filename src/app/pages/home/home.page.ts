@@ -18,20 +18,24 @@ export class HomePage implements OnInit {
   @ViewChild('file', { static: true }) file: ElementRef;
   @ViewChild('imagePreview', { static: true }) imagePreview: ElementRef;
 
+  result: string = null;
+
   constructor(private toastService: ToastController) { }
 
   ngOnInit() {
   }
 
-  ionViewDidEnter() {
+ ionViewDidEnter() {
     console.log(this.file);
 
     
-    tf.loadLayersModel('/assets/model/model.json').then(model => {
+   tf.loadLayersModel('/assets/model/otherModel/model.json').then(model => {
       this.model = model;
+      
       this.toast("Model was loaded successfully");
     })
     .catch(e => {
+      console.log(e);
       this.toast("Error loading model");
     });
 
@@ -40,6 +44,8 @@ export class HomePage implements OnInit {
   setFile() {
     const input: HTMLInputElement = this.file.nativeElement;
     this.hasValidImage = false;
+
+    this.result = null;
 
 
     if (input.files.length > 0) {
@@ -83,23 +89,17 @@ export class HomePage implements OnInit {
 
     if (input.files.length > 0) {
 
-      // const file = input.files[0];
+      let tensor = tf.browser.fromPixels(this.rescaleImg(this.imagePreview.nativeElement), 3)
+        .resizeNearestNeighbor([200, 200]) // change the image size
+        .expandDims()
+        .toFloat().reverse(-1);
 
-      console.log(this.imagePreview.nativeElement);
-      
+      let predictions = this.model.classify(tensor) as any;
 
-      let tensor = tf.browser.fromPixels(this.imagePreview.nativeElement, 3)
-        .resizeNearestNeighbor([250, 250]) // change the image size
-        .expandDims();
+      const d = await predictions.data() as [];
+      console.log(d);
 
-
-
-      let predictions = this.model.predict(tensor) as any;
-      console.log("Predictions: ", predictions.data(), predictions.shape);
-
-      this.toast("Done processing predictions...");
-
-      let top5 = Array.from(predictions.data())
+      let top5 = Array.from(d)
         .map(function (p, i) { // this is Array.map
           return {
             probability: p,
@@ -108,9 +108,12 @@ export class HomePage implements OnInit {
         })
         .sort(function (a: any, b: any) {
           return b.probability - a.probability;
-        });
+        }).slice(0,5) as any[];
 
       console.log(top5);
+      this.result = top5[0].className;
+      
+      
 
     }
 
@@ -129,5 +132,17 @@ export class HomePage implements OnInit {
     }).then(toast => {
       toast.present();
     })
+  }
+
+   rescaleImg(img) {
+    var cv = require('opencv.js');
+    const src = cv.imread(img);
+    let dst = new cv.Mat();
+    
+    // rescale by 1/255, and hold values in a matrix with float32 data type
+    src.convertTo(dst, cv.CV_32F, 1./255.); 
+    return src;
+    
+    
   }
 }

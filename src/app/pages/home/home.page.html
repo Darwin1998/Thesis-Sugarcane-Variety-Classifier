@@ -20,5 +20,7 @@
     <!-- <ion-button (click)="triggerModel">model</ion-button> -->
     <ion-button color="success" (click)="classify()" *ngIf="hasValidImage">Classify</ion-button>
 
+    <p *ngIf="result">Predicted Variety: {{ result }}</p>
+
 
 </ion-content>
