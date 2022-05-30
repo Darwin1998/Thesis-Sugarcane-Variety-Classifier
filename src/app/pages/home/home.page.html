@@ -18,7 +18,12 @@
 
     <input type="file" #inputFileElement (change)="setFile()" accept="image/*">
 
+    <img src="{{imgURL}}">
+
     <ion-button (click)="triggerInputFile()">Select Image</ion-button>
+    <ion-button (click)="addPhotoToGallery()">Camera</ion-button>
+     
+    
     <!-- <ion-button (click)="triggerModel">model</ion-button> -->
 <!--    <ion-button color="success" (click)="classify()" *ngIf="hasValidImage">Classify</ion-button>-->
 
@@ -29,6 +34,7 @@
     </p>
 
     <canvas #canvas></canvas>
-
+    
+   
 
 </ion-content>

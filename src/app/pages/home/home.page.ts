@@ -2,6 +2,10 @@ import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
 import {ToastController} from '@ionic/angular';
 import * as tf from '@tensorflow/tfjs';
 import {TARGET_CLASSES} from './target_classes';
+import { Camera, CameraOptions } from '@awesome-cordova-plugins/camera/ngx';
+import { PhotoService } from 'src/app/services/photo.service';
+
+
 
 @Component({
   selector: 'app-home',
@@ -12,6 +16,7 @@ export class HomePage implements OnInit {
 
   hasValidImage = false;
 
+  imgURL;
 
 
   model = null;
@@ -24,12 +29,37 @@ export class HomePage implements OnInit {
   @ViewChild('imagePreview', {static: true}) imagePreview: ElementRef;
 
   result: string = null;
+ 
 
-  constructor(private toastService: ToastController) {
+ 
+  constructor(private toastService: ToastController,
+              private camera: Camera,
+              public photoService: PhotoService) {
   }
+ 
 
   ngOnInit() {
   }
+
+    options: CameraOptions = {
+    quality: 100,
+    destinationType: this.camera.DestinationType.FILE_URI,
+    encodingType: this.camera.EncodingType.JPEG,
+    mediaType: this.camera.MediaType.PICTURE
+  }
+  addPhotoToGallery() {
+    this.photoService.addNewToGallery();
+  }
+
+  getCamera(){
+    this.camera.getPicture(this.options).then((res)=>{
+      this.imgURL = 'data:image/jpeg;base64,' + res;
+    }).catch(e => {
+      console.log(e);
+    })
+  }
+
+
 
   ionViewDidEnter() {
     console.log(this.inputFileElement);
