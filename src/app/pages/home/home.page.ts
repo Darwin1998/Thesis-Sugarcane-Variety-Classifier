@@ -42,6 +42,7 @@ export class HomePage implements OnInit {
 
 
   ngOnInit() {
+
   }
 
   captureImage() {
@@ -49,68 +50,58 @@ export class HomePage implements OnInit {
 
       quality: 100,
       destinationType: this.camera.DestinationType.FILE_URI,
-      // encodingType: this.camera.EncodingType.JPEG,
+      encodingType: this.camera.EncodingType.JPEG,
       mediaType: this.camera.MediaType.PICTURE
 
     }).then((fileUri) => {
 
-      const cropOpt: CropOptions = {
-        quality: 55,
-        targetHeight: 250,
-        targetWidth: 250
-      }
-
-      this.crop.crop(fileUri, cropOpt)
-        .then(
-          newPath => {
-            let splitPath = newPath.split('/');
-            let imgName = splitPath[splitPath.length - 1];
-
-            if (imgName.indexOf("?") > -1)
-              imgName = imgName.split("?")[0]
-
-            let fileUrl = newPath.split(imgName)[0];
-
-            console.log("cropping");
-            console.log("file url: " + fileUrl);
-            console.log("img name: " + imgName);
-
-
-            this.filePlugin.readAsDataURL(fileUrl, imgName).then((base64Cropped: string) => {
-
-              this.previewImage(base64Cropped)
-
-            }, (error: any) => {
-              console.log("Error: ", error);
-
-            }).catch(e => {
-              console.log("Catch: ", e)
-            })
-          },
-          error => {
-            alert('Error in cropper' + error);
-          }
-        );
-
+      this.cropImageFile(fileUri)
 
     }, (err) => {
-      console.log(err);
-      // Handle error
+      console.log("Error in captureImage(): ", err);
     });
   }
 
-  // addPhotoToGallery() {
-  //   this.photoService.addNewToGallery();
-  // }
+  cropImageFile(fileUri: string) {
+    const cropOpt: CropOptions = {
+      quality: 55,
+      targetHeight: 250,
+      targetWidth: 250
+    }
 
-  // getCamera(){
-  //   this.camera.getPicture(this.options).then((res)=>{
-  //     this.imgURL = 'data:image/jpeg;base64,' + res;
-  //   }).catch(e => {
-  //     console.log(e);
-  //   })
-  // }
+    this.crop.crop(fileUri, cropOpt)
+      .then(
+        fileUri => {
 
+          this.readImageFile(fileUri);
+
+        },
+        error => {
+          console.log("Error in cropImageFile(): ", error)
+        }
+      );
+  }
+
+  readImageFile(fileUri: string) {
+    let splitPath = fileUri.split('/');
+    let imgName = splitPath[splitPath.length - 1];
+
+    if (imgName.indexOf("?") > -1)
+      imgName = imgName.split("?")[0]
+
+    let fileUrl = fileUri.split(imgName)[0];
+
+    this.filePlugin.readAsDataURL(fileUrl, imgName).then((base64Cropped: string) => {
+
+      this.previewImage(base64Cropped)
+
+    }, (error: any) => {
+      console.log("Error in readImageFile(): ", error);
+
+    }).catch(e => {
+      console.log("Catched error in readImageFile(): ", e);
+    })
+  }
 
   ionViewDidEnter() {
     console.log(this.inputFileElement);
