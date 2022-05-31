@@ -5,7 +5,7 @@ import {TARGET_CLASSES} from './target_classes';
 import {Camera, CameraOptions} from '@awesome-cordova-plugins/camera/ngx';
 import {PhotoService} from 'src/app/services/photo.service';
 import {Crop, CropOptions} from '@ionic-native/crop/ngx';
-import { File } from '@ionic-native/file/ngx';
+import {File} from '@ionic-native/file/ngx';
 
 
 @Component({
@@ -37,7 +37,7 @@ export class HomePage implements OnInit {
               private camera: Camera,
               public photoService: PhotoService,
               private crop: Crop,
-              private File: File) {
+              private filePlugin: File) {
   }
 
 
@@ -46,16 +46,13 @@ export class HomePage implements OnInit {
 
   captureImage() {
     this.camera.getPicture({
+
       quality: 100,
       destinationType: this.camera.DestinationType.FILE_URI,
-      encodingType: this.camera.EncodingType.JPEG,
+      // encodingType: this.camera.EncodingType.JPEG,
       mediaType: this.camera.MediaType.PICTURE
-    }).then((fileUri) => {
-      // imageData is either a base64 encoded string or a file URI
-      // If it's base64 (DATA_URL):
-      // const base64 = 'data:image/jpeg;base64,' + imageData;
 
-      // this.previewImage(base64)
+    }).then((fileUri) => {
 
       const cropOpt: CropOptions = {
         quality: 55,
@@ -68,26 +65,27 @@ export class HomePage implements OnInit {
           newPath => {
             let splitPath = newPath.split('/');
             let imgName = splitPath[splitPath.length - 1];
+
+            if (imgName.indexOf("?") > -1)
+              imgName = imgName.split("?")[0]
+
             let fileUrl = newPath.split(imgName)[0];
-            
+
             console.log("cropping");
-            console.log("file url: "+fileUrl);
-            console.log("img name: "+imgName);
-            
-            
-            this.file.readAsDataURL(fileUrl, imgName).then((base64Cropped: string) => {
-              console.log("cropping akdalskdlasdklas");
-              this.croppedimg = base64Cropped;
-              base64Cropped = 'data:image/jpeg;base64,' + fileUrl;
-              
-              console.log("base64 ni siya: "+base64Cropped);
-              
+            console.log("file url: " + fileUrl);
+            console.log("img name: " + imgName);
+
+
+            this.filePlugin.readAsDataURL(fileUrl, imgName).then((base64Cropped: string) => {
+
               this.previewImage(base64Cropped)
 
             }, (error: any) => {
-             console.log(error);
+              console.log("Error: ", error);
 
-            }).catch(e=>{console.log(e)})
+            }).catch(e => {
+              console.log("Catch: ", e)
+            })
           },
           error => {
             alert('Error in cropper' + error);
