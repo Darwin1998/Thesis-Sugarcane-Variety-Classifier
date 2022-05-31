@@ -9,6 +9,7 @@ import { AppRoutingModule } from './app-routing.module';
 
 import { Camera } from '@awesome-cordova-plugins/camera/ngx';
 import { Crop } from "@ionic-native/crop/ngx";
+import { File } from '@ionic-native/file/ngx';
 
 @NgModule({
   declarations: [AppComponent],
@@ -20,7 +21,8 @@ import { Crop } from "@ionic-native/crop/ngx";
       useClass: IonicRouteStrategy
     },
     Camera,
-    Crop
+    Crop,
+    File
   ],
   bootstrap: [AppComponent],
 })

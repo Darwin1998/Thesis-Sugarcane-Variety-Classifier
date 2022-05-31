@@ -5,6 +5,7 @@ import {TARGET_CLASSES} from './target_classes';
 import {Camera, CameraOptions} from '@awesome-cordova-plugins/camera/ngx';
 import {PhotoService} from 'src/app/services/photo.service';
 import {Crop, CropOptions} from '@ionic-native/crop/ngx';
+import { File } from '@ionic-native/file/ngx';
 
 
 @Component({
@@ -17,6 +18,7 @@ export class HomePage implements OnInit {
   hasValidImage = false;
 
   imgURL;
+  croppedimg: string;
   clickedImage: string;
 
   model = null;
@@ -34,7 +36,8 @@ export class HomePage implements OnInit {
   constructor(private toastService: ToastController,
               private camera: Camera,
               public photoService: PhotoService,
-              private crop: Crop) {
+              private crop: Crop,
+              private File: File) {
   }
 
 
@@ -55,7 +58,9 @@ export class HomePage implements OnInit {
       // this.previewImage(base64)
 
       const cropOpt: CropOptions = {
-        quality: 55
+        quality: 55,
+        targetHeight: 250,
+        targetWidth: 250
       }
 
       this.crop.crop(fileUri, cropOpt)
@@ -64,15 +69,25 @@ export class HomePage implements OnInit {
             let splitPath = newPath.split('/');
             let imgName = splitPath[splitPath.length - 1];
             let fileUrl = newPath.split(imgName)[0];
-
-            this.file.readAsDataURL(fileUrl, imgName).then(base64Cropped => {
-
+            
+            console.log("cropping");
+            console.log("file url: "+fileUrl);
+            console.log("img name: "+imgName);
+            
+            
+            this.file.readAsDataURL(fileUrl, imgName).then((base64Cropped: string) => {
+              console.log("cropping akdalskdlasdklas");
+              this.croppedimg = base64Cropped;
+              base64Cropped = 'data:image/jpeg;base64,' + fileUrl;
+              
+              console.log("base64 ni siya: "+base64Cropped);
+              
               this.previewImage(base64Cropped)
 
-            }, error => {
-              alert(error);
+            }, (error: any) => {
+             console.log(error);
 
-            });
+            }).catch(e=>{console.log(e)})
           },
           error => {
             alert('Error in cropper' + error);
