@@ -4,6 +4,7 @@ import * as tf from '@tensorflow/tfjs';
 import {TARGET_CLASSES} from './target_classes';
 import {Camera, CameraOptions} from '@awesome-cordova-plugins/camera/ngx';
 import {PhotoService} from 'src/app/services/photo.service';
+import {Crop, CropOptions} from '@ionic-native/crop/ngx';
 
 
 @Component({
@@ -32,27 +33,52 @@ export class HomePage implements OnInit {
 
   constructor(private toastService: ToastController,
               private camera: Camera,
-              public photoService: PhotoService) {
+              public photoService: PhotoService,
+              private crop: Crop) {
   }
 
 
   ngOnInit() {
   }
 
-  options: CameraOptions = {
-    quality: 100,
-    destinationType: this.camera.DestinationType.DATA_URL,
-    encodingType: this.camera.EncodingType.JPEG,
-    mediaType: this.camera.MediaType.PICTURE
-  }
-
   captureImage() {
-    this.camera.getPicture(this.options).then((imageData) => {
+    this.camera.getPicture({
+      quality: 100,
+      destinationType: this.camera.DestinationType.FILE_URI,
+      encodingType: this.camera.EncodingType.JPEG,
+      mediaType: this.camera.MediaType.PICTURE
+    }).then((fileUri) => {
       // imageData is either a base64 encoded string or a file URI
       // If it's base64 (DATA_URL):
-      const base64 = 'data:image/jpeg;base64,' + imageData;
+      // const base64 = 'data:image/jpeg;base64,' + imageData;
 
-      this.previewImage(base64)
+      // this.previewImage(base64)
+
+      const cropOpt: CropOptions = {
+        quality: 55
+      }
+
+      this.crop.crop(fileUri, cropOpt)
+        .then(
+          newPath => {
+            let splitPath = newPath.split('/');
+            let imgName = splitPath[splitPath.length - 1];
+            let fileUrl = newPath.split(imgName)[0];
+
+            this.file.readAsDataURL(fileUrl, imgName).then(base64Cropped => {
+
+              this.previewImage(base64Cropped)
+
+            }, error => {
+              alert(error);
+
+            });
+          },
+          error => {
+            alert('Error in cropper' + error);
+          }
+        );
+
 
     }, (err) => {
       console.log(err);
