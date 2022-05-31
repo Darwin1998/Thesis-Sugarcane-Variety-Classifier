@@ -8,6 +8,9 @@ import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
 
 import { Camera } from '@awesome-cordova-plugins/camera/ngx';
+import { ImageCropperModule } from 'ngx-image-cropper';
+import { Crop } from '@ionic-native/crop';
+
 
 
 @NgModule({
@@ -19,7 +22,9 @@ import { Camera } from '@awesome-cordova-plugins/camera/ngx';
       provide: RouteReuseStrategy,
       useClass: IonicRouteStrategy
     },
-    Camera
+    Camera,
+    ImageCropperModule,
+    
   ],
   bootstrap: [AppComponent],
 })

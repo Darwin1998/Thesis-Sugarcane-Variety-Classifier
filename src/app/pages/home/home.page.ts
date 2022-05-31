@@ -4,6 +4,9 @@ import * as tf from '@tensorflow/tfjs';
 import {TARGET_CLASSES} from './target_classes';
 import {Camera, CameraOptions} from '@awesome-cordova-plugins/camera/ngx';
 import {PhotoService} from 'src/app/services/photo.service';
+import { ImageCropperModule } from 'ngx-image-cropper';
+
+
 
 
 @Component({
@@ -15,7 +18,7 @@ export class HomePage implements OnInit {
 
   hasValidImage = false;
 
-  imgURL;
+
   clickedImage: string;
 
   model = null;
@@ -32,7 +35,11 @@ export class HomePage implements OnInit {
 
   constructor(private toastService: ToastController,
               private camera: Camera,
-              public photoService: PhotoService) {
+              public photoService: PhotoService,
+              private imagecropppermodule: ImageCropperModule
+           
+                    ) 
+              {
   }
 
 
@@ -101,7 +108,7 @@ export class HomePage implements OnInit {
       const width = newImg.width;
 
 
-      const scale = 1;
+      const scale = 1/255;
 
       this.canvas.nativeElement.width = this.imagePreview.nativeElement.naturalWidth * scale;
       this.canvas.nativeElement.height = this.imagePreview.nativeElement.naturalHeight * scale;
