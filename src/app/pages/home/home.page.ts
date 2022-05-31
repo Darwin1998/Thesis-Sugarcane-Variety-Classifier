@@ -17,7 +17,7 @@ export class HomePage implements OnInit {
   hasValidImage = false;
 
   imgURL;
-
+  clickedImage: string;
 
   model = null;
 
@@ -47,17 +47,29 @@ export class HomePage implements OnInit {
     encodingType: this.camera.EncodingType.JPEG,
     mediaType: this.camera.MediaType.PICTURE
   }
-  addPhotoToGallery() {
-    this.photoService.addNewToGallery();
+ 
+  captureImage() {
+    this.camera.getPicture(this.options).then((imageData) => {
+      // imageData is either a base64 encoded string or a file URI
+      // If it's base64 (DATA_URL):
+      let base64Image = 'data:image/jpeg;base64,' + imageData;
+      this.clickedImage = base64Image;
+    }, (err) => {
+      console.log(err);
+      // Handle error
+    });
   }
+  // addPhotoToGallery() {
+  //   this.photoService.addNewToGallery();
+  // }
 
-  getCamera(){
-    this.camera.getPicture(this.options).then((res)=>{
-      this.imgURL = 'data:image/jpeg;base64,' + res;
-    }).catch(e => {
-      console.log(e);
-    })
-  }
+  // getCamera(){
+  //   this.camera.getPicture(this.options).then((res)=>{
+  //     this.imgURL = 'data:image/jpeg;base64,' + res;
+  //   }).catch(e => {
+  //     console.log(e);
+  //   })
+  // }
 
 
 
