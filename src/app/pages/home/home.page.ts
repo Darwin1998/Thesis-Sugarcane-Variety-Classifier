@@ -2,9 +2,8 @@ import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
 import {ToastController} from '@ionic/angular';
 import * as tf from '@tensorflow/tfjs';
 import {TARGET_CLASSES} from './target_classes';
-import { Camera, CameraOptions } from '@awesome-cordova-plugins/camera/ngx';
-import { PhotoService } from 'src/app/services/photo.service';
-
+import {Camera, CameraOptions} from '@awesome-cordova-plugins/camera/ngx';
+import {PhotoService} from 'src/app/services/photo.service';
 
 
 @Component({
@@ -29,36 +28,38 @@ export class HomePage implements OnInit {
   @ViewChild('imagePreview', {static: true}) imagePreview: ElementRef;
 
   result: string = null;
- 
 
- 
+
   constructor(private toastService: ToastController,
               private camera: Camera,
               public photoService: PhotoService) {
   }
- 
+
 
   ngOnInit() {
   }
 
-    options: CameraOptions = {
+  options: CameraOptions = {
     quality: 100,
-    destinationType: this.camera.DestinationType.FILE_URI,
+    destinationType: this.camera.DestinationType.DATA_URL,
     encodingType: this.camera.EncodingType.JPEG,
     mediaType: this.camera.MediaType.PICTURE
   }
- 
+
   captureImage() {
     this.camera.getPicture(this.options).then((imageData) => {
       // imageData is either a base64 encoded string or a file URI
       // If it's base64 (DATA_URL):
-      let base64Image = 'data:image/jpeg;base64,' + imageData;
-      this.clickedImage = base64Image;
+      const base64 = 'data:image/jpeg;base64,' + imageData;
+
+      this.previewImage(base64)
+
     }, (err) => {
       console.log(err);
       // Handle error
     });
   }
+
   // addPhotoToGallery() {
   //   this.photoService.addNewToGallery();
   // }
@@ -70,7 +71,6 @@ export class HomePage implements OnInit {
   //     console.log(e);
   //   })
   // }
-
 
 
   ionViewDidEnter() {
@@ -89,6 +89,36 @@ export class HomePage implements OnInit {
 
   }
 
+  previewImage(src: string) {
+    this.imagePreview.nativeElement.src = src;
+    this.hasValidImage = true;
+
+
+    const newImg = new Image();
+
+    newImg.onload = () => {
+      const height = newImg.height;
+      const width = newImg.width;
+
+
+      const scale = 1;
+
+      this.canvas.nativeElement.width = this.imagePreview.nativeElement.naturalWidth * scale;
+      this.canvas.nativeElement.height = this.imagePreview.nativeElement.naturalHeight * scale;
+
+      const context = this.canvas.nativeElement.getContext('2d');
+      context.drawImage(this.imagePreview.nativeElement, 0, 0, this.canvas.nativeElement.width, this.canvas.nativeElement.height);
+
+
+      // console.log(this.canvas.nativeElement)
+
+      this.classify();
+
+    }
+
+    newImg.src = this.imagePreview.nativeElement.src
+  }
+
   setFile() {
     const input: HTMLInputElement = this.inputFileElement.nativeElement;
     this.hasValidImage = false;
@@ -105,35 +135,8 @@ export class HomePage implements OnInit {
 
       const reader = new FileReader();
       reader.onload = () => {
-        this.imagePreview.nativeElement.src = reader.result as string;
-        this.hasValidImage = true;
 
-
-        const newImg = new Image();
-
-        newImg.onload = () => {
-          const height = newImg.height;
-          const width = newImg.width;
-
-
-          const scale = 1;
-
-          this.canvas.nativeElement.width = this.imagePreview.nativeElement.naturalWidth * scale;
-          this.canvas.nativeElement.height = this.imagePreview.nativeElement.naturalHeight * scale;
-
-          const context = this.canvas.nativeElement.getContext('2d');
-          context.drawImage(this.imagePreview.nativeElement, 0, 0, this.canvas.nativeElement.width, this.canvas.nativeElement.height);
-
-
-          // console.log(this.canvas.nativeElement)
-
-          this.classify();
-
-        }
-
-        newImg.src = this.imagePreview.nativeElement.src
-
-
+        this.previewImage(reader.result as string)
 
 
       };
@@ -161,8 +164,7 @@ export class HomePage implements OnInit {
     }
 
 
-
-    if (this.file) {
+    if (this.hasValidImage) {
 
       let tensor = tf.browser.fromPixels(this.canvas.nativeElement, 3)
         .resizeNearestNeighbor([200, 200]) // change the image size
