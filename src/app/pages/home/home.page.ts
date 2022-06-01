@@ -107,7 +107,7 @@ export class HomePage implements OnInit {
     console.log(this.inputFileElement);
 
 
-    tf.loadLayersModel('/assets/model/model.json').then(model => {
+    tf.loadLayersModel('/assets/model/June1_model_v2/model.json').then(model => {
       this.model = model;
 
       this.toast("Model was loaded successfully");
@@ -205,7 +205,7 @@ export class HomePage implements OnInit {
       let predictions = this.model.predict(tensor) as any;
 
       const d = await predictions.data() as [];
-      console.log(d);
+      console.log("predictions: " +d);
 
       let top5 = Array.from(d)
         .map(function (p, i) { // this is Array.map
