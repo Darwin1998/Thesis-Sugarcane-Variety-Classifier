@@ -107,7 +107,7 @@ export class HomePage implements OnInit {
     console.log(this.inputFileElement);
 
 
-    tf.loadLayersModel('/assets/model/June1_model_v2/model.json').then(model => {
+    tf.loadLayersModel('/assets/model/Other Model/model.json').then(model => {
       this.model = model;
 
       this.toast("Model was loaded successfully");
