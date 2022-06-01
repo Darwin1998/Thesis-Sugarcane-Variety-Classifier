@@ -48,7 +48,7 @@ export class HomePage implements OnInit {
   captureImage() {
     this.camera.getPicture({
 
-      quality: 100,
+      quality: 250,
       destinationType: this.camera.DestinationType.FILE_URI,
       encodingType: this.camera.EncodingType.JPEG,
       mediaType: this.camera.MediaType.PICTURE
@@ -64,7 +64,7 @@ export class HomePage implements OnInit {
 
   cropImageFile(fileUri: string) {
     const cropOpt: CropOptions = {
-      quality: 55,
+      quality: 250,
       targetHeight: 250,
       targetWidth: 250
     }
@@ -131,7 +131,7 @@ export class HomePage implements OnInit {
       const width = newImg.width;
 
 
-      const scale = 1;
+      const scale = 1/255;
 
       this.canvas.nativeElement.width = this.imagePreview.nativeElement.naturalWidth * scale;
       this.canvas.nativeElement.height = this.imagePreview.nativeElement.naturalHeight * scale;
@@ -197,10 +197,10 @@ export class HomePage implements OnInit {
     if (this.hasValidImage) {
 
       let tensor = tf.browser.fromPixels(this.canvas.nativeElement, 3)
-        .resizeNearestNeighbor([200, 200]) // change the image size
+        .resizeNearestNeighbor([250, 250]) // change the image size
         .expandDims()
-        // .toFloat()
-        .reverse(-1);
+        .toFloat()
+        ;
 
       let predictions = this.model.predict(tensor) as any;
 
