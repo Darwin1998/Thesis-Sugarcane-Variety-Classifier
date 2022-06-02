@@ -203,7 +203,7 @@ export class HomePage implements OnInit {
         .resizeNearestNeighbor([200, 200]) // change the image size
         .toFloat()
         .expandDims()
-        .div(255)
+      
         
         
         ;
