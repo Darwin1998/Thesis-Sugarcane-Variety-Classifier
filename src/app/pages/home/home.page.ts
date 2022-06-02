@@ -6,6 +6,7 @@ import {Camera, CameraOptions} from '@awesome-cordova-plugins/camera/ngx';
 import {PhotoService} from 'src/app/services/photo.service';
 import {Crop, CropOptions} from '@ionic-native/crop/ngx';
 import {File} from '@ionic-native/file/ngx';
+import { tensor } from '@tensorflow/tfjs';
 
 
 @Component({
@@ -107,8 +108,9 @@ export class HomePage implements OnInit {
     console.log(this.inputFileElement);
 
 
-    tf.loadLayersModel('/assets/model/Other Model/model.json').then(model => {
+    tf.loadLayersModel('/assets/model/SCVC_J1_3/model.json').then(model => {
       this.model = model;
+      console.log(model.summary());
 
       this.toast("Model was loaded successfully");
     })
@@ -131,7 +133,7 @@ export class HomePage implements OnInit {
       const width = newImg.width;
 
 
-      const scale = 1/255;
+      const scale = 1.0/255;
 
       this.canvas.nativeElement.width = this.imagePreview.nativeElement.naturalWidth * scale;
       this.canvas.nativeElement.height = this.imagePreview.nativeElement.naturalHeight * scale;
@@ -197,11 +199,15 @@ export class HomePage implements OnInit {
     if (this.hasValidImage) {
 
       let tensor = tf.browser.fromPixels(this.canvas.nativeElement, 3)
-        .resizeNearestNeighbor([250, 250]) // change the image size
-        .expandDims()
+        
+        .resizeNearestNeighbor([200, 200]) // change the image size
         .toFloat()
+        .expandDims()
+        .div(255)
+        
+        
         ;
-
+      
       let predictions = this.model.predict(tensor) as any;
 
       const d = await predictions.data() as [];
