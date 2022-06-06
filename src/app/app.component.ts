@@ -7,11 +7,11 @@ import { defineCustomElements } from '@ionic/pwa-elements/loader';
 })
 export class AppComponent {
   public appPages = [
-    { title: 'Home', url: '/home', icon: 'mail' },
+    { title: 'Home', url: '/home', icon: 'home' },
    
     { title: 'About Us', url: '/about-us', icon: 'warning' },
   ];
-  public labels = ['Family', 'Friends', 'Notes', 'Work', 'Travel', 'Reminders'];
+ 
   constructor() {
     defineCustomElements(window);
   }

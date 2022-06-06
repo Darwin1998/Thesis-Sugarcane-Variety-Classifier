@@ -49,6 +49,7 @@ export class HomePage implements OnInit {
   captureImage() {
     this.camera.getPicture({
 
+      allowEdit: false,
       quality: 250,
       destinationType: this.camera.DestinationType.FILE_URI,
       encodingType: this.camera.EncodingType.JPEG,
@@ -203,7 +204,7 @@ export class HomePage implements OnInit {
         .resizeNearestNeighbor([200, 200]) // change the image size
         .toFloat()
         .expandDims()
-      
+        .div(255)
         
         
         ;
